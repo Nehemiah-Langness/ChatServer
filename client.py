@@ -1,12 +1,16 @@
+from os import name as osName
 from sys import stdin
 from select import select
-from multiprocessing import Process, set_start_method
+from multiprocessing import Process
 from textwrap import TextWrapper
 from traceback import format_exc
 
 import networkingInterface
 import terminal
 from server import externalEntry
+
+if (osName != "nt"):
+    from multiprocessing import set_start_method
 
 messages = []                          # Holds the sent messages
 errors = []                            # Holds the logged errors
@@ -237,7 +241,9 @@ def handleMessage(data):
 # startServer()
 # Start a daemonic server process as a child of this process
 def startServer():
-    set_start_method("spawn")
+    if (osName != "nt"):
+        set_start_method("spawn")
+        
     serv = Process(target=externalEntry)
     serv.daemon = True
     serv.start()
@@ -308,6 +314,9 @@ def handleSudoCommand(command):
         killServer()
         print("The server is not a problem anymore, master")
 
+def exitWhenUserReady():
+    printErrors()
+    terminal.getInput("Press any key to continue...")
 
 # main()
 # Do the whole thing
@@ -331,11 +340,11 @@ def main():
     # Connect to the host
     if (interface.connectToHost()):
         if (not initiateHandshake(userName)):
-            printErrors()
+            exitWhenUserReady()
             return
     else:
         addError("Unable to internet :(")
-        printErrors()
+        exitWhenUserReady()
         return
 
     # Create the inputs
@@ -370,7 +379,8 @@ def main():
     # Gracefully shut down and show logged errors
     terminal.clear()
     interface.sendQuit()
-    printErrors()
+    exitWhenUserReady()
+    
 
 if (__name__ == "__main__"):
     main()

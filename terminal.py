@@ -1,3 +1,11 @@
+try:
+    import ctypes
+    kernel32 = ctypes.windll.kernel32
+    kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
+except:
+    print("Unable to initialize virtual terminal")
+
+
 # Class holding constants for font manipulation
 class Font:
     BOLD = '\033[1m'

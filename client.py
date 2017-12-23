@@ -8,6 +8,7 @@ from traceback import format_exc
 import networkingInterface
 import terminal
 from server import externalEntry
+from userInput import startReader
 
 if (osName != "nt"):
     from multiprocessing import set_start_method
@@ -149,6 +150,15 @@ def getInput():
 
     userInput = stdin.readline().strip('\n')
     parseUserInput(userInput)
+    refresh = True
+
+# userInputCallback(userInput)
+# userInput -- the input from the user
+# Process input from the user
+# Sets the refresh flag to true
+def userInputCallback(userInput):
+    global refresh
+    parseUserInput(userInput.strip('\n'))
     refresh = True
 
 
@@ -349,9 +359,9 @@ def main():
 
     # Create the inputs
     socket = interface.getSocket()
-    inputList = [socket, stdin]
+    inputList = [socket]
+    startReader(userInputCallback)
     screenRefresh()
-
 
     # Main loop
     while (not quit):
